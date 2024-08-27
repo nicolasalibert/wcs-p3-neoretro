@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Form\EventIsVisibleFormType;
 use App\Form\EventType;
 use App\Repository\EventRepository;
+use App\Service\EventService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,7 +41,16 @@ class EventController extends AbstractController
             'events' => $events,
             'pageTitle' => 'Events',
             'isVisibleForm' => $isVisibleForm ?? '',
-            'isVisible' => $isVisible
+            'isVisible' => $isVisible,
+        ]);
+    }
+
+    #[Route('/{slug}', name: 'show', methods: ['GET'])]
+    public function show(Event $event): Response
+    {
+        return $this->render('event/show.html.twig', [
+            'event' => $event,
+            'pageTitle' => 'Event details',
         ]);
     }
 
@@ -72,15 +82,6 @@ class EventController extends AbstractController
             'event' => $event,
             'form' => $form,
             'pageTitle' => 'New event'
-        ]);
-    }
-
-    #[Route('/{slug}', name: 'show', methods: ['GET'])]
-    public function show(Event $event): Response
-    {
-        return $this->render('event/show.html.twig', [
-            'event' => $event,
-            'pageTitle' => 'Event details',
         ]);
     }
 
@@ -117,24 +118,15 @@ class EventController extends AbstractController
     }
 
     #[Route('/{slug}/enroll', name: 'enroll', methods: ['GET'])]
-    public function enroll(Event $event, EntityManagerInterface $entityManager, Request $request): Response
+    public function enroll(Event $event, EntityManagerInterface $entityManager, Request $request, EventService $eventService): Response
     {
         $user = $this->getUser();
         $referer = $request->headers->get('referer');
 
-        if (!$user) {
-            $this->addFlash('warning', 'You need to be logged in to enroll in an event.');
-            return $this->redirectToRoute('dashboard');
-        }
-
-        if (!$event->isVisible()) {
-            $this->addFlash('warning', 'This event is not currently ready for enrollment.');
-            return $this->redirect($referer ?: $this->generateUrl('event_index'));
-        }
-
-        if ($event->getParticipants()->contains($user)) {
-            $this->addFlash('warning', 'You are already enrolled in this event.');
-            return $this->redirect($referer ?: $this->generateUrl('event_index'));
+        $error = $eventService->checkEnrollment($event, $user, 'enroll');
+        if ($error) {
+            $this->addFlash('warning', $error);
+            return $user ? $this->redirect($referer ? : $this->generateUrl('event_index')) : $this->redirectToRoute('dashboard');
         }
 
         $event->addParticipant($user);
@@ -150,25 +142,16 @@ class EventController extends AbstractController
         return $this->redirect($referer ?: $this->generateUrl('event_show', ['slug' => $event->getSlug()]));
     }
 
-    #[Route('/{slug}/cancel', name: 'cancel', methods: ['GET'])]
-    public function cancell(Event $event, EntityManagerInterface $entityManager, Request $request): Response
+    #[Route('/{slug}/unenroll', name: 'unenroll', methods: ['GET'])]
+    public function unenroll(Event $event, EntityManagerInterface $entityManager, Request $request, EventService $eventService): Response
     {
         $user = $this->getUser();
         $referer = $request->headers->get('referer');
 
-        if (!$user) {
-            $this->addFlash('warning', 'You need to be logged in to cancel your participation in an event.');
-            return $this->redirectToRoute('dashboard');
-        }
-
-        if (!$event->isVisible()) {
-            $this->addFlash('warning', 'This event is not currently available.');
-            return $this->redirect($referer ?: $this->generateUrl('event_index'));
-        }
-
-        if (!$event->getParticipants()->contains($user)) {
-            $this->addFlash('warning', 'You are not enrolled in this event.');
-            return $this->redirect($referer ?: $this->generateUrl('event_index'));
+        $error = $eventService->checkEnrollment($event, $user, 'unenroll');
+        if ($error) {
+            $this->addFlash('warning', $error);
+            return $user ? $this->redirect($referer ? : $this->generateUrl('event_index')) : $this->redirectToRoute('dashboard');
         }
 
         $event->removeParticipant($user);

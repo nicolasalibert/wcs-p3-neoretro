@@ -35,7 +35,7 @@
                     </a>
                 </div>
             </div>
-            
+
             {# <a class="btn-admin" href="{{ path('prize_index') }}">
                 Prizes' List
                 <img class="icon" src="{{ asset('build/images/icons/eye.png') }}" alt="Eye icon">
@@ -75,7 +75,7 @@
                 </div>
             </section>
         {% endif %}
-    
+
         <section class="card cell-played">
             <div class="content">
                 <h2>Recently Played</h2>
@@ -117,7 +117,7 @@
                 {% endif %}
             </div>
         </section>
-    
+
         <section class="card cell-high-score">
             <div class="content">
                 <h2>High Score</h2>
@@ -137,7 +137,7 @@
                                     <li>
                                         {{ bestGamesPlayed[0].score }}
                                     </li>
-                                    
+
                                     <li>
                                         {{ bestGameDuration }}
                                     </li>
@@ -161,7 +161,7 @@
                 {% endif %}
             </div>
         </section>
-        
+
         <section class="card cell-this-week">
             <div class="content">
                 {% if is_granted('ROLE_ADMIN') %}
@@ -169,7 +169,7 @@
                         <img src="{{ asset('build/images/icons/edit2.svg') }}">
                     </a>
                 {% endif %}
-                
+
                 <h2>This week</h2>
 
                 <ul>
@@ -211,7 +211,7 @@
                         <div class="room-info">
                             <img src="{{ asset('build/images/icons/portal-enter.svg') }}" alt="portal enter icon">
                             <p>
-                                42 rue du Salusava 93666 Saint-2ni
+                                44 rue Alphonse Penaud 75020 Paris
                             </p>
                         </div>
                         <div class="room-info" id="more-details">

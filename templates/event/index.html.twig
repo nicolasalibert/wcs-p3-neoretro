@@ -83,7 +83,7 @@
                                             </a>
                                         {% else %}
                                             {% if app.user and event.isUserEnrolled(app.user) %}
-                                            <a href="{{ path('event_cancel', {slug: event.slug}) }}">
+                                            <a href="{{ path('event_unenroll', {slug: event.slug}) }}">
                                                 <button class="big-btn big-btn">CANCEL</button>
                                             </a>
                                             {% else %}

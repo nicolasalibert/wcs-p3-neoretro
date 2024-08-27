@@ -8,13 +8,13 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\Choice;
 
 class GameSearchType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            // ->setMethod('GET')
             ->add('title', TextType::class, [
             'required'  => false,
             'label'     => false,
@@ -33,13 +33,20 @@ class GameSearchType extends AbstractType
                 ]
             ])
             ->add('sort_by', HiddenType::class, [
-                'constraints' => []
+                'constraints' => [
+                    new Choice(['choices' => ['title', 'score', 'time']]),
+                ]
             ])
             ->add('sort_order', HiddenType::class, [
-                'constraints' => []
+                'constraints' => [
+                    new Choice(['choices' => ['ASC', 'DESC']]),
+                ]
             ])
             ->add('isVisible', HiddenType::class, [
                 'data' => '1',
+                'constraints' => [
+                    new Choice(['choices' => ['1', '0']]),
+                ]
             ])
         ;
     }
